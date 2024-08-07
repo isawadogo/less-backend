@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const critereSchema = mongoose.Schema({
-    local: Boolean,
+    local: Boolean, 
     bio: Boolean,
     vegetarien: Boolean,
     vegan: Boolean,
@@ -9,24 +9,34 @@ const critereSchema = mongoose.Schema({
     faibleEnSucre: Boolean,
     faibleEnMatiereGrasse: Boolean,
     faibleEmpreinte: Boolean,
-    allergie: Array,
-    budget: Number,
+    allergie: [String],
+    budget: Number, 
+    distance: Number,
 });
 
 const utilisateurSchema = new mongoose.Schema({
     prefixe: String,
     prenom: String,
     nom: String,
-    dateDeNaissance: Date,
-    adresses: Array,
+    dateDeNaissance: { type: Date, default: new Date("1995-12-17T03:24:00")},
+    adresses: [{
+        commune: String,
+        codePostal: Number,
+        nomDeRue: String,
+        numeroDeRue: String
+    }],
     telephone: String,
     email: String,
-    modDePasse: String,
+    motDePasse: String,
     token: String,
     profilConso: String,
-    criteres: critereSchema
+    criteres: {
+        type: critereSchema,
+        default: {}
+    },
+    notifications: [String],
 })
 
-const Utilisateur = mongoose.model('utilisateur', utilisateurSchema);
+const Utilisateur = mongoose.model('utilisateurs', utilisateurSchema);
 
 module.exports = Utilisateur

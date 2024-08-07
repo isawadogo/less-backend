@@ -4,21 +4,27 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
-require("./models/connection")
+//require("./models/connection");
+const auth = require('./modules/auth');
+
 var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+var usersRouter = require('./routes/utilisateurs');
 
 var app = express();
 const cors = require('cors');
 app.use(cors());
 
-app.use(logger('dev'));
+const helmet = require('helmet');
+app.use(helmet());
+
+app.use(logger(':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"'));
+//app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/utilisateur', usersRouter);
 
 module.exports = app;
