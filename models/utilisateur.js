@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 
 const critereSchema = mongoose.Schema({
-
     local: Boolean,
     bio: Boolean,
     vegetarien: Boolean,
@@ -14,11 +13,7 @@ const critereSchema = mongoose.Schema({
     budget: Number,
 });
 
-
-
-
 const utilisateurSchema = new mongoose.Schema({
-
     prefixe: String,
     prenom: String,
     nom: String,
@@ -32,9 +27,6 @@ const utilisateurSchema = new mongoose.Schema({
     criteres: critereSchema
 })
 
-
-
-
-const Utilisateur = mongoose.model('enseignes', utilisateurSchema);
+const Utilisateur = mongoose.model('utilisateur', utilisateurSchema);
 
 module.exports = Utilisateur
