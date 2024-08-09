@@ -12,7 +12,7 @@ const HASH_ROUNDS = 10;
 const UID_LENGTH = 32;
 
 /*
-Route : POST - User login - /utilisateur/login
+Route : POST - User login - /utilisateur/signin
 IN : body = {  email: String, password: String }
 Returns : 
     OK = { result: true, token: The_User_Token, id: ObjectId }
@@ -57,10 +57,12 @@ router.post('/signin',
 /*
 Route : POST - User data update - /utilisateur/update
 IN : body = { usedId: ObjectId: nom: String, prenom: String, dateDeNaissance, notifications: [String],
+              telephone: String, prefixe: String, profilConso: String,
               criteres: { local: Boolean, bio: Boolean, vegeterien: Boolean, vegan: Boolean
                           premierPrix: Boolean, faibleEnMatiereGrasse: Boolean, faibleEnSucre: Boolean,
-                          faibleEmpreinte: Boolean, allergies: [String], budget: Number, distance: Number}
-              adresses: [{ commune: String, codePostal: Number, nomDeRue: String, numeroDeRue: String}] }
+                          faibleEmpreinte: Boolean, allergies: [String], budget: Number, distance: Number},
+              adresses: [{ commune: String, codePostal: Number, nomDeRue: String, numeroDeRue: String}] },
+              preferences: { afficheEcranAccueil: Boolean, recevoirNotifications: Boolean }
 Returns : 
     OK = { result: true, token: The_User_Token }
     KO = { result: false, error: error_message }
@@ -79,7 +81,8 @@ router.post('/update',
     try {
       const excludedFields = { 
         __v: false,
-        _id: false
+        _id: false,
+        motDePasse: false,
       };
       const userDetails = await User.find({
         _id: req.body.userId
@@ -97,7 +100,10 @@ router.post('/update',
         mergedData
       );
       if ( updatedData.acknowledged) {
-        res.json({ result: true, message: "User successfully updated" });
+        const updateUserData = await User.find({
+          _id: req.body.userId
+        }, excludedFields);
+        res.json({ result: true, user: updateUserData[0] });
       } else {
         res.json({ result: false, message: "No User have been updated" });
       }
@@ -181,7 +187,7 @@ router.post('/signup',
         email: req.body.email
       });
       if (userDetails && bcrypt.compareSync(req.body.password, userDetails.motDePasse)) {
-        res.json({ result: true, token: userDetails.token });
+        res.json({ result: true, token: userDetails.token, id: userDetails._id });
       } else {
         res.json({ result: false, error: 'User not found or wrong password' });
       }

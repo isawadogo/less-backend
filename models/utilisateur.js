@@ -35,6 +35,10 @@ const utilisateurSchema = new mongoose.Schema({
         default: {}
     },
     notifications: [String],
+    preferences: {
+        afficherEcranAccueil: Boolean,
+        recevoirNotifications: Boolean
+    }
 })
 
 const Utilisateur = mongoose.model('utilisateurs', utilisateurSchema);
