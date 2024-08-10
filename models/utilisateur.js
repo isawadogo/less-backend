@@ -1,43 +1,43 @@
 const mongoose = require('mongoose');
 
 const critereSchema = mongoose.Schema({
-    local: Boolean, 
-    bio: Boolean,
-    vegetarien: Boolean,
-    vegan: Boolean,
-    premierPrix: Boolean,
-    faibleEnSucre: Boolean,
-    faibleEnMatiereGrasse: Boolean,
-    faibleEmpreinte: Boolean,
+    local: { type: Boolean, default: false }, 
+    bio: { type: Boolean, default: false },
+    vegetarien: { type: Boolean, default: false },
+    vegan: { type: Boolean, default: false },
+    premierPrix: { type: Boolean, default: false },
+    faibleEnSucre: { type: Boolean, default: false },
+    faibleEnMatiereGrasse: { type: Boolean, default: false },
+    faibleEmpreinte: { type: Boolean, default: false },
     allergie: [String],
-    budget: Number, 
-    distance: Number,
+    budget: { type: Number, default: 0 },
+    distance: { type: Number, default: 0 }
 });
 
 const utilisateurSchema = new mongoose.Schema({
-    prefixe: String,
-    prenom: String,
-    nom: String,
+    prefixe: { type: String, default: '' },
+    prenom: { type: String, default: '' },
+    nom: { type: String, default: '' },
     dateDeNaissance: { type: Date, default: new Date("1995-12-17T03:24:00")},
     adresses: [{
-        commune: String,
-        codePostal: Number,
-        nomDeRue: String,
-        numeroDeRue: String
+        commune: { type: String, default: '' },
+        codePostal: { type: String, default: '' },
+        nomDeRue: { type: String, default: '' },
+        numeroDeRue: { type: String, default: '' }
     }],
-    telephone: String,
-    email: String,
-    motDePasse: String,
-    token: String,
-    profilConso: String,
+    telephone: { type: String, default: '' },
+    email: { type: String, default: '' },
+    motDePasse: { type: String, default: '' },
+    token: { type: String, default: '' },
+    profilConso: { type: String, default: '' },
     criteres: {
         type: critereSchema,
         default: {}
     },
     notifications: [String],
     preferences: {
-        afficherEcranAccueil: Boolean,
-        recevoirNotifications: Boolean
+        afficherEcranAccueil: { type: Boolean, default: false },
+        recevoirNotifications: { type: Boolean, default: false }
     }
 })
 

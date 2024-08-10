@@ -198,4 +198,44 @@ router.post('/signup',
     }
 });
 
+/*
+Route : GET - User signup- /utilisateur/details/:userID
+IN : body = {  }
+Returns : 
+    OK = { result: true, user: UserDetailsFromMongoDB }
+    KO = { result: false, error: error_message }
+
+Description : This route retrieves user details except password
+*/
+router.get('/details/:userId', async function (req, res, next) {
+  // validate params: email and password are mandatory
+    /*const result = validationResult(req);
+    if (!result.isEmpty()) {
+      res.json({result: false, error: result.array()})
+      return
+    }*/
+    try {
+      const excludedFields = { 
+        __v: false,
+        _id: false,
+        motDePasse: false,
+      };
+      const userDetails = await User.find({
+        _id: req.params.userId
+      }, excludedFields);
+      
+      if (userDetails.length === 0){
+        res.json({result: false, error: `User with id ${req.params.userId} does not exist`});
+        return;
+      }
+
+      res.json({ result: true, user: userDetails[0] });
+
+    } catch(err) {
+      console.error(err.stack);
+      res.json({result: false, error: "Failed to get user details. Please see logs for more details"});
+      next(err);
+    }
+});
+
 module.exports = router;
