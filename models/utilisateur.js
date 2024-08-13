@@ -9,9 +9,6 @@ const critereSchema = mongoose.Schema({
     faibleEnSucre: { type: Boolean, default: false },
     faibleEnMatiereGrasse: { type: Boolean, default: false },
     faibleEmpreinte: { type: Boolean, default: false },
-    allergie: [String],
-    budget: { type: Number, default: 0 },
-    distance: { type: Number, default: 0 }
 });
 
 const utilisateurSchema = new mongoose.Schema({
@@ -38,7 +35,10 @@ const utilisateurSchema = new mongoose.Schema({
     preferences: {
         afficherEcranAccueil: { type: Boolean, default: false },
         recevoirNotifications: { type: Boolean, default: false }
-    }
+    },
+    allergies: [String],
+    budget: { type: Number, default: 0 },
+    distance: { type: Number, default: 0 }
 })
 
 const Utilisateur = mongoose.model('utilisateurs', utilisateurSchema);
