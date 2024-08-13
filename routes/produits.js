@@ -79,12 +79,20 @@ router.get('/details/:id',
   async function (req, res, next) {
   // validate params: email and password are mandatory
     try {
-      const resTemp = await fetch(produitBackend + '/' + req.params.id);
+      const resTemp = await fetch(produitBackend + '/' + req.params.id,
+      {
+        headers: { "Content-Type": "application/json", "authorization": API_KEY},
+      }
+      );
       const resJson = await resTemp.json();
       if (!resJson.result ){
         res.json({result: false, error: `Failed to produit with id ${req.params.id} : error from backend : ${resJson.error}`});
       } else {
-        res.json({ result: true, produit: resJson.produit });
+        if (!resJson.produit) {
+          res.json({result: false, error: `Failed to produit with id ${req.params.id} : produit key is empty`});
+        } else {
+          res.json({ result: true, produit: resJson.produit});
+        }
       }
     } catch(err) {
       console.error(err.stack);
