@@ -9,6 +9,7 @@ const auth = require('./modules/auth');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/utilisateurs');
+var produitsRouter = require('./routes/produits');
 
 var app = express();
 const cors = require('cors');
@@ -26,5 +27,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/utilisateur', usersRouter);
+app.use('/produits', produitsRouter);
 
 module.exports = app;
