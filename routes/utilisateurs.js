@@ -233,4 +233,29 @@ router.get('/details/:userId', async function (req, res, next) {
     }
 });
 
+/* Route : GET - User budget - /utilisateur/budget/:token
+IN : user token
+Returns :
+  OK = { result: true, budget: UserBudgetFromMongoDB }
+  KO = { result: false, error: error_message }
+
+Description : This route retrieves user's budget detail with user token
+*/
+
+router.get('/budget/:token', (req, res) => {
+  const user = User.find(token = req.params.token)
+  if (!user) {
+    res.json({ result: false, error: "Failed to retreive user" })
+  } else {
+    res.json({ result: true, budget: data})
+  }
+
+});
+
+/* route test: all user*/
+router.get('/all', (req, res) =>{
+  User.find()
+    .then(users => res.json({ usersList : users}))
+});
+
 module.exports = router;
