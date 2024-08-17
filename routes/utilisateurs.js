@@ -1,5 +1,5 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 
 require('../models/connection');
 const User = require('../models/utilisateur');
@@ -11,8 +11,7 @@ const bcrypt = require('bcrypt');
 const HASH_ROUNDS = 10;
 const UID_LENGTH = 32;
 
-/*
-Route : POST - User login - /utilisateur/signin
+/* Route : POST - User login - /utilisateur/signin
 IN : body = {  email: String, password: String }
 Returns : 
     OK = { result: true, token: The_User_Token, id: ObjectId }
@@ -54,8 +53,7 @@ router.post('/signin',
   }
 });
 
-/*
-Route : POST - User data update - /utilisateur/update
+/* Route : POST - User data update - /utilisateur/update
 IN : body = { usedId: ObjectId: nom: String, prenom: String, dateDeNaissance, notifications: [String],
               telephone: String, prefixe: String, profilConso: String,
               criteres: { local: Boolean, bio: Boolean, vegeterien: Boolean, vegan: Boolean
@@ -115,8 +113,7 @@ router.post('/update',
     }
 });
 
-/*
-Route : POST - User password update - /utilisateur/updatePassword
+/* Route : POST - User password update - /utilisateur/updatePassword
 IN : body = { usedId: ObjectId, password: String }
 Returns : 
     OK = { result: true }
@@ -163,8 +160,7 @@ router.post('/updatePassword',
     }
 });
 
-/*
-Route : POST - User signup- /utilisateur/signup
+/* Route : POST - User signup- /utilisateur/signup
 IN : body = { email: ObjectId, password: String }
 Returns : 
     OK = { result: true }
@@ -198,8 +194,7 @@ router.post('/signup',
     }
 });
 
-/*
-Route : GET - User signup- /utilisateur/details/:userID
+/* Route : GET - User signup- /utilisateur/details/:userID
 IN : body = {  }
 Returns : 
     OK = { result: true, user: UserDetailsFromMongoDB }

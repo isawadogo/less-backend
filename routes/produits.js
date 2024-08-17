@@ -10,8 +10,7 @@ const { produitBackend, enseignesList } = require('../modules/config')
 //const { body, validationResult } = require('express-validator');
 
 
-/*
-Route : GET - Get categories - /produits/categories
+/* Route : GET - Get categories - /produits/categories
 IN : body = { }
 Returns : 
     OK = { result: true, categories: [category_name] }
@@ -36,8 +35,7 @@ router.get('/categories',
    res.json({result: true, categories: categoriesList });
 });
 
-/*
-Route : GET - Get categories - /produits/categories/:id
+/* Route : GET - Get categories - /produits/categories/:id
 IN : body = { }
 Returns : 
     OK = { result: true, produits: [{ id: category_id, name: category_name}] }
@@ -89,8 +87,7 @@ router.get('/categories/:id',
     }
 });
 
-/*
-Route : GET - Get product details - /produits/:id
+/* Route : GET - Get product details - /produits/:id
 IN : body = { }
 Returns : 
     OK = { result: true, produit: [{ id: category_id, name: category_name}] }
