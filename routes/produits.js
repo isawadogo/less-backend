@@ -9,7 +9,6 @@ const { produitBackend, enseignesList } = require('../modules/config')
 
 //const { body, validationResult } = require('express-validator');
 
-
 /*
 Route : GET - Get categories - /produits/categories
 IN : body = { }
@@ -20,25 +19,31 @@ Description : This route returns all the categories we manage
 */
 router.get('/categories', 
   async function (req, res, next) {
-  let categoriesList = [];
-  for (const ens of enseignesList) {
-    const resTemp = await fetch(ens.backendURL + '/categories',
-      {
-        headers: { "Content-Type": "application/json", "authorization": API_KEY},
+  try {
+    let categoriesList = [];
+    for (const ens of enseignesList) {
+      const resTemp = await fetch(ens.backendURL + '/categories',
+        {
+          headers: { "Content-Type": "application/json", "authorization": API_KEY},
+        }
+      )
+      const json = await resTemp.json();
+      if (json.result) {
+        //console.log(`categories enseigne ${ens.id} : ${json.categories}`);
+        json.categories.map((c) => {if (!categoriesList.includes(c)) {categoriesList.push(c)}})
       }
-    )
-    const json = await resTemp.json();
-    if (json.result) {
-      //console.log(`categories enseigne ${ens.id} : ${json.categories}`);
-      json.categories.map((c) => {if (!categoriesList.includes(c)) {categoriesList.push(c)}})
     }
+    res.json({result: true, categories: categoriesList });
+  } catch(err) {
+    console.error(err.stack);
+    res.json({result: false, error: "Failed to get categories list. Please see logs for more details"});
+    next(err);
   }
-  res.json({result: true, categories: categoriesList });
 });
 
 /*
-Route : GET - Get categories - /produits/categories/:id
-IN : body = { }
+Route : GET - Get categories - /produits/categories/:id?&page=pageNumber&limit=resultsPerPage
+IN : body = 
 Returns : 
     OK = { result: true, produits: [{ id: category_id, name: category_name}] }
     KO = { result: false, error: error_message }
@@ -47,24 +52,37 @@ Description : This route returns all the products for a given category
 router.get('/categories/:id', 
   async function (req, res, next) {
 
+  const page = parseInt(req.query.page, 10) || 1;
+  const limit = parseInt(req.query.limit, 10) || 10;
+  //const offset = (page - 1) * limit;
+
+  let totalProduits = 0;
+
   let categoriesList = [];
-  const excludedFields = { 
-    __v: false,
-   };
   for (const ens of enseignesList) {
-    const resTemp = await fetch(ens.backendURL + '/categories/' + req.params.id,
-      {
-        headers: { "Content-Type": "application/json", "authorization": API_KEY},
+    try {
+      const resTemp = await fetch(ens.backendURL + '/categories/' + req.params.id + '?page=' + page + '&limit=' + limit,
+        {
+          headers: { "Content-Type": "application/json", "authorization": API_KEY},
+        }
+      )
+      const json = await resTemp.json();
+      if (json.result) {
+        //console.log(`categories enseigne ${ens.id} : ${json.categories}`);
+        //json.categories.map((c) => {if (!categoriesList.includes(c)) {categoriesList.push(c)}})
+        categoriesList.push(...json.produits)
+        totalProduits += json.totalProduits
+      } else {
+        res.json({result: false, error: `call to enseigne ${ens} did not succed. lease see logs for more details`})
+        continue
       }
-    )
-    const json = await resTemp.json();
-    //if (json.result) {
-      //console.log(`categories enseigne ${ens.id} : ${json.categories}`);
-      //json.categories.map((c) => {if (!categoriesList.includes(c)) {categoriesList.push(c)}})
-    //}
-    categoriesList.push(...json.produits)
+    } catch (err) {
+      console.error(err.stack);
+      res.json({result: false, error: `Failed to get produits for ${eq.params.id} on enseigne ${ens}. Please see logs for more details`});
+      next(err);
+    }
   }
-  res.json({result: true, produits: categoriesList });
+  res.json({result: true, produits: categoriesList, totalProduits: totalProduits });
 });
 
 /*
