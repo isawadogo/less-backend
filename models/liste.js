@@ -5,7 +5,7 @@ const articleSchema = mongoose.Schema({
     prix: Number,
     quantite: Number,
     enseigne: String,
-    critere: [String],
+    criteres: [String],
 });
 
 const listeSchema = new mongoose.Schema({
@@ -20,7 +20,8 @@ const listeSchema = new mongoose.Schema({
     listeArticle: articleSchema,
     utilisateur: { type: mongoose.Schema.Types.ObjectId, ref: "utilisateurs" },
     dateArriveePrevu: Date,
-    statutLivraison: String
+    statutLivraison: String,
+    dateCreation: Date.now
 })
 
 const Liste = mongoose.model('listes', listeSchema);
