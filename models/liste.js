@@ -21,7 +21,11 @@ const listeSchema = new mongoose.Schema({
     utilisateur: { type: mongoose.Schema.Types.ObjectId, ref: "utilisateurs" },
     dateArriveePrevu: Date,
     statutLivraison: String,
+<<<<<<< HEAD
     dateCreation: Date.now
+=======
+    dateCreation: { type: Date, default: Date.now },
+>>>>>>> 0d529f88493227aff737875f6773b84b89d60830
 })
 
 const Liste = mongoose.model('listes', listeSchema);

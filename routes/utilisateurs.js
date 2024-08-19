@@ -1,5 +1,5 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 
 require('../models/connection');
 const User = require('../models/utilisateur');
@@ -11,8 +11,7 @@ const bcrypt = require('bcrypt');
 const HASH_ROUNDS = 10;
 const UID_LENGTH = 32;
 
-/*
-Route : POST - User login - /utilisateur/signin
+/* Route : POST - User login - /utilisateur/signin
 IN : body = {  email: String, password: String }
 Returns : 
     OK = { result: true, token: The_User_Token, id: ObjectId }
@@ -54,8 +53,7 @@ router.post('/signin',
   }
 });
 
-/*
-Route : POST - User data update - /utilisateur/update
+/* Route : POST - User data update - /utilisateur/update
 IN : body = { usedId: ObjectId: nom: String, prenom: String, dateDeNaissance, notifications: [String],
               telephone: String, prefixe: String, profilConso: String,
               criteres: { local: Boolean, bio: Boolean, vegeterien: Boolean, vegan: Boolean
@@ -115,8 +113,7 @@ router.post('/update',
     }
 });
 
-/*
-Route : POST - User password update - /utilisateur/updatePassword
+/* Route : POST - User password update - /utilisateur/updatePassword
 IN : body = { usedId: ObjectId, password: String }
 Returns : 
     OK = { result: true }
@@ -163,8 +160,7 @@ router.post('/updatePassword',
     }
 });
 
-/*
-Route : POST - User signup- /utilisateur/signup
+/* Route : POST - User signup- /utilisateur/signup
 IN : body = { email: ObjectId, password: String }
 Returns : 
     OK = { result: true }
@@ -198,8 +194,7 @@ router.post('/signup',
     }
 });
 
-/*
-Route : GET - User signup- /utilisateur/details/:userID
+/* Route : GET - User signup- /utilisateur/details/:userID
 IN : body = {  }
 Returns : 
     OK = { result: true, user: UserDetailsFromMongoDB }
@@ -236,6 +231,31 @@ router.get('/details/:userId', async function (req, res, next) {
       res.json({result: false, error: "Failed to get user details. Please see logs for more details"});
       next(err);
     }
+});
+
+/* Route : GET - User budget - /utilisateur/budget/:token
+IN : user token
+Returns :
+  OK = { result: true, budget: UserBudgetFromMongoDB }
+  KO = { result: false, error: error_message }
+
+Description : This route retrieves user's budget detail with user token
+*/
+
+router.get('/budget/:token', (req, res) => {
+  const user = User.find(token = req.params.token)
+  if (!user) {
+    res.json({ result: false, error: "Failed to retreive user" })
+  } else {
+    res.json({ result: true, budget: data})
+  }
+
+});
+
+/* route test: all user*/
+router.get('/all', (req, res) =>{
+  User.find()
+    .then(users => res.json({ usersList : users}))
 });
 
 module.exports = router;
