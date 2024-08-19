@@ -20,7 +20,8 @@ const listeSchema = new mongoose.Schema({
     listeArticle: articleSchema,
     utilisateur: { type: mongoose.Schema.Types.ObjectId, ref: "utilisateurs" },
     dateArriveePrevu: Date,
-    statutLivraison: String
+    statutLivraison: String,
+    dateCreation: { type: Date, default: Date.now },
 })
 
 const Liste = mongoose.model('listes', listeSchema);
