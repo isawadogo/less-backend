@@ -5,9 +5,39 @@ require('../models/connection');
 //const User = require('../models/utilisateur');
 const API_KEY = process.env.ENSEIGNE_API_KEY
 
-const { produitBackend, enseignesList } = require('../modules/config')
+const { produitBackend, enseignesList, enseigneBackend } = require('../modules/config')
 
 //const { body, validationResult } = require('express-validator');
+/*
+Route : GET - Get categories - /produits/categories
+IN : body = { }
+Returns : 
+    OK = { result: true, categories: [category_name] }
+    KO = { result: false, error: error_message }
+Description : This route returns all the categories we manage
+*/
+router.get('/enseignes', 
+  async function (req, res, next) {
+  try {
+      const resTemp = await fetch(enseigneBackend,
+        {
+          headers: { "Content-Type": "application/json", "authorization": API_KEY},
+        }
+      )
+      const json = await resTemp.json();
+      console.log('json enseigne list : ', json)
+      if (json.result) {
+        res.json({result: true, enseignes: json.enseignes })  
+      } else {
+        res.json({result: false, error: 'failed to get enseignes list from enseigne backend API'});
+      }
+  } catch(err) {
+    console.error(err.stack);
+    res.json({result: false, error: "Failed to get categories list. Please see logs for more details"});
+    next(err);
+  }
+});
+
 
 /*
 Route : GET - Get categories - /produits/categories
@@ -42,7 +72,7 @@ router.get('/categories',
 });
 
 /*
-Route : GET - Get categories - /produits/categories/:id?&page=pageNumber&limit=resultsPerPage
+Route : GET - Get categories - /produits/categories/:id?nomProduit&page=pageNumber&limit=resultsPerPage
 IN : body = 
 Returns : 
     OK = { result: true, produits: [{ id: category_id, name: category_name}] }
@@ -55,34 +85,35 @@ router.get('/categories/:id',
   const page = parseInt(req.query.page, 10) || 1;
   const limit = parseInt(req.query.limit, 10) || 10;
   //const offset = (page - 1) * limit;
+  //const nomProduit = req.query.nomProduit || '';
+  const nomProduit = req.query.nomProduit ;
 
   let totalProduits = 0;
 
-  let categoriesList = [];
-  for (const ens of enseignesList) {
-    try {
-      const resTemp = await fetch(ens.backendURL + '/categories/' + req.params.id + '?page=' + page + '&limit=' + limit,
-        {
-          headers: { "Content-Type": "application/json", "authorization": API_KEY},
-        }
-      )
-      const json = await resTemp.json();
-      if (json.result) {
-        //console.log(`categories enseigne ${ens.id} : ${json.categories}`);
-        //json.categories.map((c) => {if (!categoriesList.includes(c)) {categoriesList.push(c)}})
-        categoriesList.push(...json.produits)
-        totalProduits += json.totalProduits
-      } else {
-        res.json({result: false, error: `call to enseigne ${ens} did not succed. lease see logs for more details`})
-        continue
-      }
-    } catch (err) {
-      console.error(err.stack);
-      res.json({result: false, error: `Failed to get produits for ${eq.params.id} on enseigne ${ens}. Please see logs for more details`});
-      next(err);
-    }
+  let reqURL = produitBackend + '/categories/' + req.params.id + '?page=' + page + '&limit=' + limit
+  if (nomProduit) {
+    reqURL = produitBackend + '/categories/' + req.params.id + '?nomProduit=' + nomProduit +'&page=' + page + '&limit=' + limit 
   }
-  res.json({result: true, produits: categoriesList, totalProduits: totalProduits });
+  try {
+    const resTemp = await fetch(reqURL,
+      {
+        headers: { "Content-Type": "application/json", "authorization": API_KEY},
+      }
+    )
+    const json = await resTemp.json();
+    if (json.result) {
+      //console.log(`categories enseigne ${ens.id} : ${json.categories}`);
+      //json.categories.map((c) => {if (!categoriesList.includes(c)) {categoriesList.push(c)}})
+      totalProduits += json.totalProduits
+      res.json({result: true, produits: json.produits, totalProduits: totalProduits });
+    } else {
+      res.json({result: false, error: `call to backend did not succed. lease see logs for more details`})
+    }
+  } catch (err) {
+    console.error(err.stack);
+    res.json({result: false, error: `Failed to get produits for ${eq.params.id} . Please see logs for more details`});
+    next(err);
+  }
 });
 
 /*
@@ -117,6 +148,42 @@ router.get('/details/:id',
       res.json({result: false, error: "Failed to get produit detalils. Please see logs for more details"});
       next(err);
     }
+});
+/*
+Route : GET - Get categories - /produits/produitsNom/:id
+IN : body = 
+Returns : 
+    OK = { result: true, produits: [{ url: url_produit, nom: nom_produit}] }
+    KO = { result: false, error: error_message }
+Description : This route returns all the products for a given category
+*/
+router.get('/categories/produitsNom/:id', 
+  async function (req, res, next) {
+
+  const page = parseInt(req.query.page, 10) || 1;
+  const limit = parseInt(req.query.limit, 10) || 10;
+  //const offset = (page - 1) * limit;
+
+  try {
+    //const resTemp = await fetch(backendURL + '/produits/nomsProduit/' + req.params.id + '?page=' + page + '&limit=' + limit,
+    const resTemp = await fetch(produitBackend + '/nomsProduit/' + req.params.id,
+      {
+        headers: { "Content-Type": "application/json", "authorization": API_KEY},
+      }
+    )
+    const json = await resTemp.json();
+    if (json.result) {
+      //console.log(`categories enseigne ${ens.id} : ${json.categories}`);
+      //json.categories.map((c) => {if (!categoriesList.includes(c)) {categoriesList.push(c)}})
+      res.json({result: true, produits: json.produits});
+    } else {
+      res.json({result: false, error: `call to backend  did not succed. lease see logs for more details`})
+    }
+  } catch (err) {
+    console.error(err.stack);
+    res.json({result: false, error: `Failed to get produits for ${req.params.id}. Please see logs for more details`});
+    next(err);
+  }
 });
 
 module.exports = router;
