@@ -1,5 +1,7 @@
 const produitBackend = 'https://less-backend-magasin.vercel.app/produit';
 
+const enseigneBackend = 'https://less-backend-magasin.vercel.app/enseigne';
+
 const enseignesList = [ 
     {   id: 'enseigne1', 
         nom: 'Leclerc',
@@ -22,4 +24,4 @@ const enseignesList = [
     } 
 ];
 
-module.exports = { produitBackend, enseignesList };
+module.exports = { produitBackend, enseignesList, enseigneBackend };
