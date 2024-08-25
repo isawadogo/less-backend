@@ -25,7 +25,7 @@ router.get('/enseignes',
         }
       )
       const json = await resTemp.json();
-      console.log('json enseigne list : ', json)
+      //console.log('json enseigne list : ', json)
       if (json.result) {
         res.json({result: true, enseignes: json.enseignes })  
       } else {

@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 
 const articleSchema = mongoose.Schema({
+    id: String,
+    nom: String,
     categorieProduit: String,
     prix: Number,
     quantite: Number,
@@ -17,7 +19,7 @@ const listeSchema = new mongoose.Schema({
         numeroDeRue: { type: String, default: '' }
     },
     prix: Number,
-    listeArticle: articleSchema,
+    listeArticles: [articleSchema],
     utilisateur: { type: mongoose.Schema.Types.ObjectId, ref: "utilisateurs" },
     dateArriveePrevu: Date,
     statutLivraison: String,
