@@ -154,7 +154,7 @@ router.delete('/delete/:id',
     //  res.json({result: false, error: result.array()})
     //  return
     //}
-    const nomListe = req.body.nom.toLowerCase()
+    //const nomListe = req.body.nom.toLowerCase()
     try {
       const deleteRes = await Liste.deleteOne({
         _id: req.params.id
