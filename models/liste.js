@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const articleSchema = mongoose.Schema({
     id: String,
     nom: String,
-    categorieProduit: String,
+    categorieDeProduit: String,
     prix: Number,
     quantite: Number,
     enseigne: String,
