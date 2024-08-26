@@ -91,7 +91,7 @@ router.get('/getListes/:id',
     }, excludedFields);
     
     if (listeDetails.length === 0){
-      res.json({result: false, error: `No liste found for user with ID ${req.params.userId} - ${listeDetails}`});
+      res.json({result: true, listes: []});
       return;
     }
     res.json({ result: true, listes: listeDetails });
