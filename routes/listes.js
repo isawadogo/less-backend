@@ -22,7 +22,7 @@ router.post('/calcul',
       return
   }
   const { criteres, produits, enseignes } = req.body;
-  console.log('Data received : ', req.body)
+  //console.log('Data received : ', req.body)
     // get all the produits matching criteres grouped by enseigne
     var results = [];
     const resultatsProduits= []
@@ -64,10 +64,13 @@ router.post('/calcul',
             for (const enseigne of enseignes) {
             //enseignes.forEach(function(enseigne) {
               const enseigneProduits = produitsMatch.filter((p) => p.enseigne._id === enseigne._id);
-              //console.log(`enseignes ${enseigne.enseigneNom}, critere : ${critereNom}, produits : ${JSON.stringify(enseigneProduits)}`)
+              //console.log(`enseignes ${enseigne.nom}, critere : ${critereNom}, produits : ${JSON.stringify(enseigneProduits)}`)
+              
               const enseigneProduitsCount = enseigneProduits.length;
-              const ponderation = enseigneProduitsCount === 0 ? 0 : 1;
-              const produitEnseigne = enseigneProduitsCount === 0 ? json.produits[0] : enseigneProduits[0];
+              const matched = enseigneProduitsCount !== 0;
+              const ponderation = matched ? 1 : 0;
+              const produitEnseigne = matched ? enseigneProduits[0] : json.produits[0];
+              //console.log(`MATCHED : ${matched}, ENSEIGNE PRODUITS COUNT : ${enseigneProduitsCount}, ENSEIGNE PRD : ${enseigneProduits}`)
               results.push({ 
                 enseigneId: enseigne._id, 
                 enseigneNom: enseigne.nom, 
@@ -76,6 +79,8 @@ router.post('/calcul',
                 ponderation: ponderation,
                 critere: critereNom,
                 produit: produitEnseigne,
+                quantite: produit.quantite,
+                matched: matched,
               })
             }
           }//, resultatCriteres
@@ -86,7 +91,7 @@ router.post('/calcul',
         next(err);
       }
     }
-    //console.log('RES PROD : ', results);
+    //console.log('RES PROD : ', JSON.stringify(results));
 
    // res.json({result: true, results});
     const listeRes = results
@@ -98,45 +103,64 @@ router.post('/calcul',
     const resultComparaison = listeRes.reduce((a, v, i, res) => {
       const isKeyPresent = a.some((k) => k.enseigneId == v.enseigneId);
       if (!isKeyPresent) {
+       // console.log('PASSAGE : ',i )
         let tmp = { 
           enseigneId: v.enseigneId,
           nom: v.enseigneNom,
           criteresPercentage: [],
           produits: [],
         }
+        //const critereMapping = {}
         criteresUtilisateur.map((c) => {
           const nbCrit = res.filter((r) => r.critere === c && v.enseigneId === r.enseigneId);
           const poids = nbCrit.reduce((acc, val) => acc + val.ponderation, 0);
           const totalCrit = produitsSelected.length;
           const moyenne = totalCrit !== 0 ? (poids/nbCrit.length)*100: 0;
           tmp['criteresPercentage'].push({nom: c, note: moyenne});
+          //const crits = produitsSelected.map((k) => {
+          //  const critMatchedProduits = nbCrit.filter((n) => n.matched && n.nomProduit === k)
+          //})
         });
         catSelected.map((d) => {
           res.filter((b) => b.enseigneId === v.enseigneId && v.categorie === d.nom).map((f) => {
             if (!tmp['produits'].some((x) => x.nomProduit === f.nomProduit )) {
               let crits = [];
-              if (Object.keys(f.produit).length > 0) {
-                criteresUtilisateur.map((c) => {
-                  if (f.produit[c]) {
-                    crits.push(c);
-                  }
-                })
-                tmp['produits'].push({categorie: f.categorie, nomProduit: f.nomProduit, produit: f.produit, criteres: crits, quantite: f.quantite});
-              } /*else {
-                  // Si aucun produit ne match aucun des criteres de l'utilisateur, recuperer le produit le moins cher
-              }*/
+              //if (Object.keys(f.produit).length > 0) {
+              const critMatchedProduits = res.filter((g) => g.enseigneId === f.enseigneId && 
+              g.categorie === f.categorie && g.matched &&
+              f.nomProduit === g.nomProduit)
+              //  .map((m, i, arr) => arr.filter((e) => e.produit._id === m.produit._id).map((f) => f.critere) )
+              //}
+              let produitArticles = {}
+              let critereMatch = []
+              for ( let m=criteresUtilisateur.length; m>0; m--) {
+                let tempCrit = critMatchedProduits.filter((e, i, arr) => arr.filter((f) => f.produit._id === e.produit._id))
+                //console.log('critMatchedProduits : ', critMatchedProduits);
+                //console.log('TMPCRIT : ', tempCrit);
+                let tempM = tempCrit.map((g) => g.critere)
+                //console.log('TMPM : ', tempM);
+                if (tempM.length === m) {
+                  produitArticles = tempCrit.sort((u, v) => u.produit.prix - v.produit.prix)[0].produit
+                  critereMatch = tempM;
+                  break;
+                }
+              }
+              if (Object.keys(produitArticles).length === 0) {
+                produitArticles = critMatchedProduits[0].produit
+              }
+              tmp['produits'].push({categorie: f.categorie, nomProduit: f.nomProduit, produit: produitArticles, criteres: critereMatch, quantite: f.quantite});
           }
           });
-            if (tmp['produits']) {
-              tmp['produits'].sort((c, d) => d.criteres.length - c.criteres.length);
-            }
+          if (tmp['produits']) {
+            tmp['produits'].sort((c, d) => d.criteres.length - c.criteres.length);
+          }
         });
         tmp['conformite'] = (tmp.criteresPercentage.reduce((acc, val) => acc + val.note, 0)/criteresUtilisateur.length).toFixed(2);
         //console.log('TMP : ', tmp);
         return a.concat(tmp)
       } else { return a}
     }, []);
-    console.log('Result status : Data sent - ', resultComparaison)
+    //console.log('Result status : Data sent - ', resultComparaison)
    res.json({result: true, resultComparaison});
 });
 
