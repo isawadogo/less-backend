@@ -176,7 +176,7 @@ router.post('/calcul',
               }
               //console.log('Produits Articles : ', produitArticles);
               if (Object.keys(produitArticles).length === 0) {
-                produitArticles = res.filter((e, i, arr) => arr.filter((f) => f.produit._id === e.produit._id))[0].produit
+                produitArticles = res.filter((f) => v.produit._id === f.produit._id)[0].produit
               }
               tmp['produits'].push({categorie: f.categorie, nomProduit: f.nomProduit, produit: produitArticles, criteres: critereMatch, quantite: f.quantite});
           }
