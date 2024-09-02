@@ -70,6 +70,11 @@ router.post('/calcul',
                 //console.log('PRODUITS DISTANCE : ', produitsMatch);
               break;
             }
+            //console.log('JSON RPD : ', json.produits)
+            //console.log('PROD MATCH : ', produitsMatch)
+            //if (produitsMatch.length === 0 ) {
+            //  produitsMatch = json.produits;
+            //}
             let resultats = [];
             // Get distance to the enseigne
             for (const enseigne of enseignes) {
@@ -80,7 +85,14 @@ router.post('/calcul',
               const enseigneProduitsCount = enseigneProduits.length;
               const matched = enseigneProduitsCount !== 0;
               const ponderation = matched ? 1 : 0;
-              const produitEnseigne = matched ? enseigneProduits[0] : json.produits[0]; // FAUX - filter sur l'id enseigne
+              let produitEnseigne = {};
+              //const produitEnseigne = matched ? enseigneProduits[0] : json.produits[0]; // FAUX - filter sur l'id enseigne
+              if (matched) {
+                produitEnseigne = enseigneProduits[0]
+              } else {
+                produitEnseigne = json.produits.filter((p) => p.enseigne._id === enseigne._id)[0];
+              }
+              //console.log('PROD ENSEI : ', produitEnseigne)
               //console.log(`MATCHED : ${matched}, ENSEIGNE PRODUITS COUNT : ${enseigneProduitsCount}, ENSEIGNE PRD : ${enseigneProduits}`)
               results.push({ 
                 enseigneId: enseigne._id, 
@@ -139,12 +151,15 @@ router.post('/calcul',
             if (!tmp['produits'].some((x) => x.nomProduit === f.nomProduit )) {
               let crits = [];
               //if (Object.keys(f.produit).length > 0) {
+              // Produits pour une enseigne, qui matchent au moins un critère
               const critMatchedProduits = res.filter((g) => g.enseigneId === f.enseigneId && 
               g.categorie === f.categorie && g.matched &&
               f.nomProduit === g.nomProduit)
               //  .map((m, i, arr) => arr.filter((e) => e.produit._id === m.produit._id).map((f) => f.critere) )
               //}
+              // Les articles eventuels des produits qui matchent
               let produitArticles = {}
+              // Les critères qui matchent pour les produits
               let critereMatch = []
               for ( let m=criteresUtilisateur.length; m>0; m--) {
                 let tempCrit = critMatchedProduits.filter((e, i, arr) => arr.filter((f) => f.produit._id === e.produit._id))
@@ -152,14 +167,16 @@ router.post('/calcul',
                 //console.log('TMPCRIT : ', tempCrit);
                 let tempM = tempCrit.map((g) => g.critere)
                 //console.log('TMPM : ', tempM);
+                // Si un critere matche, on récupère l'article le moins cher
                 if (tempM.length === m) {
                   produitArticles = tempCrit.sort((u, v) => u.produit.prix - v.produit.prix)[0].produit
                   critereMatch = tempM;
                   break;
                 }
               }
+              //console.log('Produits Articles : ', produitArticles);
               if (Object.keys(produitArticles).length === 0) {
-                produitArticles = critMatchedProduits[0].produit
+                produitArticles = res.filter((e, i, arr) => arr.filter((f) => f.produit._id === e.produit._id))[0].produit
               }
               tmp['produits'].push({categorie: f.categorie, nomProduit: f.nomProduit, produit: produitArticles, criteres: critereMatch, quantite: f.quantite});
           }
