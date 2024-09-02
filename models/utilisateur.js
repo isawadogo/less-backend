@@ -20,7 +20,10 @@ const utilisateurSchema = new mongoose.Schema({
         commune: { type: String, default: '' },
         codePostal: { type: String, default: '' },
         nomDeRue: { type: String, default: '' },
-        numeroDeRue: { type: String, default: '' }
+        numeroDeRue: { type: String, default: '' },
+        latitude: { type: Number, default: 0 },
+        longitude: { type: Number, default: 0 },
+        isDefault: {type: Boolean, default: true }
     }],
     telephone: { type: String, default: '' },
     email: { type: String, default: '' },

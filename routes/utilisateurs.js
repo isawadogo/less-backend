@@ -70,7 +70,7 @@ Description : This route updates user details except the password
 router.post('/update', 
   body('userId').notEmpty(),
   async function (req, res, next) {
-  // validate params: email and password are mandatory
+  // validate params: userId is mandatory
     const result = validationResult(req);
     if (!result.isEmpty()) {
       res.json({result: false, error: result.array()})
@@ -125,7 +125,7 @@ router.post('/updatePassword',
   body('password').notEmpty(),
   body('userId').notEmpty(),
   async function (req, res, next) {
-  // validate params: email and password are mandatory
+  // validate params: userId and password are mandatory
     const result = validationResult(req);
     if (!result.isEmpty()) {
       res.json({result: false, error: result.array()})

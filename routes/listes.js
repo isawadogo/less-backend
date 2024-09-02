@@ -2,7 +2,8 @@ var express = require('express');
 var router = express.Router();
 
 const { body, validationResult } = require('express-validator');
-const { produitBackend, enseignesList, enseigneBackend } = require('../modules/config')
+const { produitBackend, enseignesList, enseigneBackend } = require('../modules/config');
+const {getDistance} = require('geolib');
 
 require('../models/connection');
 //const User = require('../models/utilisateur');
@@ -14,6 +15,7 @@ router.post('/calcul',
   body('enseignes').notEmpty(),
   body('criteres').notEmpty(),
   body('produits').notEmpty(),
+  body('userCoordinates').notEmpty(),
   async function (req, res, next) {
   // validate params: nom and utilisateur are mandatory
    const result = validationResult(req);
@@ -21,10 +23,18 @@ router.post('/calcul',
       res.json({result: false, error: result.array()})
       return
   }
-  const { criteres, produits, enseignes } = req.body;
+  const { criteres, produits, enseignes, userCoordinates, userDistance } = req.body;
   //console.log('Data received : ', req.body)
     // get all the produits matching criteres grouped by enseigne
     var results = [];
+    let distancesToEnseignes =  {};
+    for (ens of enseignes) {
+        //console.log('USER COPRDS :', userCoordinates);
+        //console.log('ENS : ', ens);
+        distancesToEnseignes[ens._id] = getDistance(
+        {latitude: userCoordinates.latitude, longitude: userCoordinates.longitude},
+        {latitude: ens.localisation.latitude, longitude: ens.localisation.longitude})/1000
+    }
     const resultatsProduits= []
     for (const produit of produits) {
       const reqURL = produitBackend + '/categories/' + produit.categorie + '?nomProduit=' + produit.nom +'&page=1&limit=1000' 
@@ -53,14 +63,15 @@ router.post('/calcul',
                 //results.push({ critere: critereNom, produitsMatch, nom: produit.nom, categorie: produit.categorie });
                 break;
               case 'distance':
-                // get distance from user address to every enseigne
-
                 // get the produits of enseignes that satify the conditions
-
-                console.log('critere distance');
+                if (!userDistance || userDistance === 0) {
+                  produitsMatch = json.produits.filter((e) => distancesToEnseignes.filter((d) => d <= userDistance).include(e.enseigne._id) )
+                }
+                //console.log('PRODUITS DISTANCE : ', produitsMatch);
               break;
             }
             let resultats = [];
+            // Get distance to the enseigne
             for (const enseigne of enseignes) {
             //enseignes.forEach(function(enseigne) {
               const enseigneProduits = produitsMatch.filter((p) => p.enseigne._id === enseigne._id);
@@ -69,7 +80,7 @@ router.post('/calcul',
               const enseigneProduitsCount = enseigneProduits.length;
               const matched = enseigneProduitsCount !== 0;
               const ponderation = matched ? 1 : 0;
-              const produitEnseigne = matched ? enseigneProduits[0] : json.produits[0];
+              const produitEnseigne = matched ? enseigneProduits[0] : json.produits[0]; // FAUX - filter sur l'id enseigne
               //console.log(`MATCHED : ${matched}, ENSEIGNE PRODUITS COUNT : ${enseigneProduitsCount}, ENSEIGNE PRD : ${enseigneProduits}`)
               results.push({ 
                 enseigneId: enseigne._id, 
@@ -81,6 +92,7 @@ router.post('/calcul',
                 produit: produitEnseigne,
                 quantite: produit.quantite,
                 matched: matched,
+                distance: distancesToEnseignes[enseigne._id],
               })
             }
           }//, resultatCriteres
@@ -107,6 +119,7 @@ router.post('/calcul',
         let tmp = { 
           enseigneId: v.enseigneId,
           nom: v.enseigneNom,
+          distance: v.distance,
           criteresPercentage: [],
           produits: [],
         }
