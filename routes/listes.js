@@ -44,7 +44,8 @@ router.post('/calcul',
           headers: { "Content-Type": "application/json", "authorization": API_KEY},
         });
         const json = await resTemp.json();
-        if (json.result) {
+        //console.log('JSON : ', json);
+        if (json.result && json.produits.length > 0) {
           for (const critereNom of criteres) {
             let produitsMatch = [];
             switch (critereNom) {
@@ -91,6 +92,9 @@ router.post('/calcul',
                 produitEnseigne = enseigneProduits[0]
               } else {
                 produitEnseigne = json.produits.filter((p) => p.enseigne._id === enseigne._id)[0];
+                if (!produitEnseigne) {
+                  continue;
+                }
               }
               //console.log('PROD ENSEI : ', produitEnseigne)
               //console.log(`MATCHED : ${matched}, ENSEIGNE PRODUITS COUNT : ${enseigneProduitsCount}, ENSEIGNE PRD : ${enseigneProduits}`)
