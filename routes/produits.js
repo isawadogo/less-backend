@@ -51,19 +51,19 @@ router.get('/categories',
   async function (req, res, next) {
   try {
     let categoriesList = [];
-    for (const ens of enseignesList) {
-      const resTemp = await fetch(ens.backendURL + '/categories',
-        {
-          headers: { "Content-Type": "application/json", "authorization": API_KEY},
-        }
-      )
-      const json = await resTemp.json();
-      if (json.result) {
-        //console.log(`categories enseigne ${ens.id} : ${json.categories}`);
-        json.categories.map((c) => {if (!categoriesList.includes(c)) {categoriesList.push(c)}})
+    const resTemp = await fetch(enseigneBackend + '/getCategories',
+      {
+        headers: { "Content-Type": "application/json", "authorization": API_KEY},
       }
+    )
+    const json = await resTemp.json();
+    if (json.result) {
+      //console.log(`categories enseigne ${ens.id} : ${json.categories}`);
+      res.json({result: true, categories: json.categories });
+    } else {
+      res.json({result: false, error: "Failed to get categories from backend "})
+      console.log('Failed to get categories from backend :', res.json);
     }
-    res.json({result: true, categories: categoriesList });
   } catch(err) {
     console.error(err.stack);
     res.json({result: false, error: "Failed to get categories list. Please see logs for more details"});
